@@ -1,4 +1,7 @@
+const { name: actionName } = require("../package.json");
 const { log, run } = require("./utils/action");
+
+const LOCAL_BRANCH_NAME = `${actionName}-local`;
 
 /**
  * Fetches and checks out the remote Git branch (if it exists, the fork repository will be used)
@@ -29,7 +32,7 @@ function checkOutRemoteBranch(context) {
 
 	// Check out remote branch
 	log(`Checking out the "${context.branch}" branch`);
-	run(`git checkout ${context.branch}`);
+	run(`git checkout -b ${LOCAL_BRANCH_NAME} ${context.branch}`);
 }
 
 /**
