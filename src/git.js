@@ -1,12 +1,35 @@
 const { log, run } = require("./utils/action");
 
 /**
- * Switches the Git branch
- * @param {string} branchName - Name of the branch which should be switched to
+ * Fetches and checks out the remote Git branch (if it exists, the fork repository will be used)
+ * @param {import('./github/context').GithubContext} context - Information about the GitHub
  */
-function checkOutBranch(branchName) {
-	log(`Checking out the "${branchName}" branch`);
-	run(`git checkout ${branchName}`);
+function checkOutRemoteBranch(context) {
+	if (context.repository.hasFork) {
+		// Fork: Add fork repo as remote
+		log(`Adding "${context.repository.forkName}" fork as remote with Git`);
+		run(
+			`git remote add fork https://${context.actor}:${context.token}@github.com/${context.repository.forkName}.git`,
+		);
+	} else {
+		// No fork: Update remote URL to include auth information (so auto-fixes can be pushed)
+		log(`Adding auth information to Git remote URL`);
+		run(
+			`git remote set-url origin https://${context.actor}:${context.token}@github.com/${context.repository.repoName}.git`,
+		);
+	}
+
+	// Fetch and switch to remote branch
+	log(`Fetching remote branch "${context.branch}"`);
+	run(
+		`git fetch --no-tags --depth=1 ${context.repository.hasFork ? "fork" : "origin"} ${
+			context.branch
+		}`,
+	);
+
+	// Check out remote branch
+	log(`Checking out the "${context.branch}" branch`);
+	run(`git checkout ${context.branch}`);
 }
 
 /**
@@ -16,14 +39,6 @@ function checkOutBranch(branchName) {
 function commitChanges(message) {
 	log(`Committing changes`);
 	run(`git commit -am "${message}"`);
-}
-
-/**
- * Fetches all remote Git branches
- */
-function fetchBranches() {
-	log(`Fetching all remote Git branches`);
-	run("git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*");
 }
 
 /**
@@ -47,17 +62,11 @@ function hasChanges() {
 }
 
 /**
- * Pushes all changes to the GitHub repository
- * @param {import('./github/context').GithubContext} context - Information about the GitHub
- * repository and action trigger event
+ * Pushes all changes to the remote repository
  */
-function pushChanges(context) {
-	const remote = `https://${context.actor}:${context.token}@github.com/${context.repository.repoName}.git`;
-	const localBranch = "HEAD";
-	const remoteBranch = context.branch;
-
-	log(`Pushing changes to ${remote}`);
-	run(`git push "${remote}" ${localBranch}:${remoteBranch} --follow-tags`);
+function pushChanges() {
+	log("Pushing changes with Git");
+	run("git push");
 }
 
 /**
@@ -72,9 +81,8 @@ function setUserInfo(name, email) {
 }
 
 module.exports = {
-	checkOutBranch,
+	checkOutRemoteBranch,
 	commitChanges,
-	fetchBranches,
 	getHeadSha,
 	hasChanges,
 	pushChanges,

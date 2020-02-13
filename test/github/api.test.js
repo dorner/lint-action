@@ -28,7 +28,7 @@ describe("createCheck()", () => {
 		repository: {
 			repoName: REPOSITORY,
 			forkName: FORK_REPOSITORY,
-			isFork: false,
+			hasFork: false,
 		},
 		token: TOKEN,
 		workspace: REPOSITORY_DIR,
