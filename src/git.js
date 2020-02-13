@@ -22,17 +22,15 @@ function checkOutRemoteBranch(context) {
 		);
 	}
 
+	const remote = context.repository.hasFork ? "fork" : "origin";
+
 	// Fetch and switch to remote branch
 	log(`Fetching remote branch "${context.branch}"`);
-	run(
-		`git fetch --no-tags --depth=1 ${context.repository.hasFork ? "fork" : "origin"} ${
-			context.branch
-		}`,
-	);
+	run(`git fetch --no-tags --depth=1 ${remote} ${context.branch}`);
 
 	// Check out remote branch
 	log(`Checking out the "${context.branch}" branch`);
-	run(`git checkout -b ${LOCAL_BRANCH_NAME} ${context.branch}`);
+	run(`git checkout -b ${LOCAL_BRANCH_NAME} ${remote}/${context.branch}`);
 }
 
 /**
