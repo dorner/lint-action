@@ -27,7 +27,7 @@ function checkOutRemoteBranch(context) {
 
 	// Check out remote branch
 	log(`Checking out the "${context.branch}" branch`);
-	run(`git checkout -b ${remote}/${context.branch}`);
+	run(`git checkout --track ${remote}/${context.branch}`);
 }
 
 /**
