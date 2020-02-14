@@ -9,7 +9,7 @@ function checkOutRemoteBranch(context) {
 		// Fork: Add fork repo as remote
 		log(`Adding "${context.repository.forkName}" fork as remote with Git`);
 		run(
-			`git remote add fork https://${context.actor}:${context.token}@github.com/${context.repository.forkName}.git`,
+			`git remote add fork https://${context.repository.forkName.split("/")[0]}:${context.token}@github.com/${context.repository.forkName}.git`,
 		);
 	} else {
 		// No fork: Update remote URL to include auth information (so auto-fixes can be pushed)
