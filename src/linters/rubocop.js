@@ -31,7 +31,7 @@ class RuboCop {
 		}
 
 		// Verify that RuboCop is installed
-		if (!(await commandExists("rubocop"))) {
+		if (!(await commandExists("bundle exec rubocop"))) {
 			throw new Error(`${this.name} is not installed`);
 		}
 	}
